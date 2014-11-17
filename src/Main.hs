@@ -6,7 +6,10 @@ import Data.Functor
 import Data.List
 import qualified Data.Vector as Vec 
 import Control.Monad.Random
+import Control.Monad
 import Text.Parsec
+import Text.Parsec.Token
+import Text.Parsec.Language
 import System.Environment (getArgs)
 import System.IO
 
@@ -21,6 +24,16 @@ type Radius = Int
 -- | Input data
 data Task = Task Field [Tower] Radius
 
+-- | Options of evolution process
+data EvolOptions = EvolOptions {
+    mutationChance :: Float
+  , crossoverChance :: Float
+  , elitePart :: Float
+  , maxGeneration :: Int
+  , popCount :: Int
+  , indCount :: Int
+  }
+  
 -- | Loading Task from file
 loadTask :: FilePath -> IO Task
 loadTask path = do
@@ -47,16 +60,44 @@ loadTask path = do
       spaces
       b <- int
       return (a,b)
-    int :: Parsec String () Int
-    int = read <$> many1 digit
-    
+      
+int :: Parsec String () Int
+int = read <$> many1 digit
+  
+loadEvolOptions :: FilePath -> IO EvolOptions
+loadEvolOptions path = do
+  str <- readFile path
+  case parse parser "" str of
+    Left err -> fail $ show err
+    Right task -> return task
+  where
+    parser = do
+      spaces
+      mut <- mfloat "Mutation chance"
+      spaces
+      cros <- mfloat "Crossingover chance"
+      spaces
+      elite <- mfloat "Elite part"
+      spaces
+      maxgen <- int
+      spaces
+      popc <- int
+      spaces
+      indc <- int
+      return $ EvolOptions mut cros elite maxgen popc indc
+    floating = float $ makeTokenParser haskellDef 
+    mfloat msg = do
+        f <- floating
+        when (not $ f >= 0 && f <= 1.0) $ fail $ msg ++ " must be in range [0.0 .. 1.0]"
+        return (fromRational $ toRational f)
+          
 -- | Saving answer to file
 saveResult :: FilePath -> [Tower] -> IO ()
 saveResult path ts = withFile path WriteMode $ \h -> mapM_ (\(x,y) -> hPutStrLn h $ show x ++ " " ++ show y) ts 
 
 -- | Solving the problem using genetic algorithm
-solve :: Task -> [Tower]
-solve (Task field towers radius) = undefined
+solve :: EvolOptions -> Task -> [Tower]
+solve opts (Task field towers radius) = undefined
 
 type Chromosome = Vec.Vector Bool
 type Population = [Chromosome]
@@ -97,16 +138,21 @@ fitness :: Chromosome -> Field -> Radius -> [Tower] -> Float
 fitness chr field radius twrs = (coverage + minimal) / 2.0
   where coverage = calcCoverage chr field radius twrs
         minimal = toFloat (length $ filterTowers chr twrs) / toFloat (length twrs)
+
+-- | Caclulates next generation of population
+nextPopulation :: EvolOptions -> Population -> Rand StdGen Population
+nextPopulation opts pop = undefined
         
 -- | Reading input and output filenames from program arguments
-parseArgs :: IO (String, String)
+parseArgs :: IO (String, String, String)
 parseArgs = do
   ls <- getArgs
-  if length ls < 2 
-    then fail "Expecing two arguments: names of input file and output file"
-    else return (head ls, ls !! 1)
+  if length ls < 3 
+    then fail "Expecing three arguments: name of input file, name of output file and name of file with evolution options"
+    else return (head ls, ls !! 1, ls !! 2)
     
 main :: IO ()
 main = do
-  (input, output) <- parseArgs 
-  saveResult output =<< solve <$> loadTask input
+  (input, output, evolopts) <- parseArgs 
+  opts <- loadEvolOptions evolopts
+  saveResult output =<< solve opts <$> loadTask input
