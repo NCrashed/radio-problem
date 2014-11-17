@@ -1,0 +1,192 @@
+\documentclass[russian,utf8,emptystyle]{eskdtext}
+
+\newcommand{\No}{\textnumero} % костыль для фикса ошибки
+
+\ESKDdepartment{Федеральное государственное бюджетное образовательное учреждение высшего профессионального образования}
+\ESKDcompany{Московский государственный технический университет им. Н. Э. Баумана}
+\ESKDclassCode{23 0102}
+\ESKDtitle{Курсовая работа по дисциплине}
+\ESKDdocName{<<Эксплуатация АСОИиУ>>}
+\ESKDauthor{Гуща~А.~В.}
+\ESKDtitleApprovedBy{к.т.н. доцент}{Постников В.М.}
+\ESKDtitleAgreedBy{к.т.н. доцент}{Постников В.М.}
+\ESKDtitleDesignedBy{Студент группы ИУ5-92}{Гуща~А.~В}
+
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{tabularx,ragged2e}
+\usepackage{pdfpages}
+\renewcommand\tabularxcolumn[1]{>{\Centering}p{#1}}
+\newcommand\abs[1]{\left|#1\right|}
+
+\usepackage{longtable,tabu}
+
+\usepackage{geometry}
+\geometry{footskip = 1cm}
+
+\pagenumbering{arabic}
+\pagestyle{plain}
+
+\usepackage{setspace}
+\usepackage{enumitem}
+
+\usepackage{xcolor}
+\usepackage{listings}
+\lstset{
+    breaklines=true,
+    postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\color{red}\hookrightarrow\space}},
+    extendedchars=\true,
+    basicstyle=\small,
+    inputencoding=utf8
+}
+\lstdefinelanguage{D}{
+    keywords = {
+    abstract,
+    alias,
+    align,
+    asm,
+    assert,
+    auto,
+    body,
+    bool,
+    break,
+    byte,
+    case,
+    cast,
+    catch,
+    cdouble,
+    cent,
+    cfloat,
+    char,
+    class,
+    const,
+    continue,
+    creal,
+    dchar,
+    debug,
+    default,
+    delegate,
+    delete,
+    deprecated,
+    do,
+    double,
+    else,
+    enum,
+    export,
+    extern,
+    false,
+    final,
+    finally,
+    float,
+    for,
+    foreach,
+    foreach_reverse,
+    function,
+    goto,
+    idouble,
+    if,
+    ifloat,
+    immutable,
+    import,
+    in,
+    inout,
+    int,
+    interface,
+    invariant,
+    ireal,
+    is,
+    lazy,
+    long,
+    macro,
+    mixin,
+    module,
+    new,
+    nothrow,
+    null,
+    out,
+    override,
+    package,
+    pragma,
+    private,
+    protected,
+    public,
+    pure,
+    real,
+    ref,
+    return,
+    scope,
+    shared,
+    short,
+    static,
+    struct,
+    super,
+    switch,
+    synchronized,
+    template,
+    this,
+    throw,
+    true, 
+    try,
+    typedef,
+    typeid,
+    typeof,
+    ubyte,
+    ucent,
+    uint,
+    ulong,
+    union,
+    unittest,
+    ushort,
+    version,
+    void,
+    volatile,
+    wchar,
+    while,
+    with,
+    __FILE__,
+    __MODULE__,
+    __LINE__,
+    __FUNCTION__,
+    __PRETTY_FUNCTION__,
+    __gshared,
+    __traits,
+    __vector,
+    __parameters,
+    }
+}
+
+\begin{document}
+%\maketitle
+%\includepdf[pages={1}]{title.pdf}
+
+\section{Условие задачи}
+Имеется k потенциальных точек установки радиовышек. Какое минимальное количество вышек и в каких точках нужно установить, чтобы обеспечить максимальное покрытие сети?
+
+\section{Используемая модель}
+Сеть представляется матрицей $n$ на $m$, каждый элемент которой хранит логическое значение: есть связь ИСТИНА, связи нет - ЛОЖЬ. Входными данными модели являются:
+\begin{enumerate}[label=\arabic*.]
+\item $\{(i,j)\}$ - множество координат потенциальных точек в сети для установки радиовышек длины $k$;
+\item $r$ - радиус действия одной вышки в ячейках;
+\item $n$ и $m$ - размеры сети в ячейках;
+\end{enumerate}
+
+Выходными данными модели являются:
+\begin{enumerate}[label=\arabic*.]
+\item $\{(k,m)\}$ - множество координат точек, где нужно установить вышки, длины $l$, с условием $l \leq k$.
+\end{enumerate}
+
+Входные данные считываются из файла, где в первой строчке записан радиус действия одной вышки в ячейках, во второй строчке размеры сети в ячейках через пробел, а в каждой последующей строчке записаны координаты потенциальных точек в сети для установки радиовышек, координаты разделены пробелом. Координаты отсчитываются с нуля. Пример входного файла:
+\begin{verbatim}
+2
+10 10
+0 9
+1 5
+2 2
+3 6
+5 1
+6 4
+8 2
+8 7
+\end{verbatim}
+
+\end{document}
