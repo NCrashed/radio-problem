@@ -163,16 +163,18 @@ calcCoverage (Task fsize twrs radius) chr = coverage $ foldl' placeTower field $
         inRadius :: DIM2 -> Bool
         inRadius (Z :. y :. x) = (tx-x)*(tx-x) + (ty-y)*(ty-y) <= radius*radius
     coverage :: Field -> Float
-    coverage f = toFloat covered / toFloat area
+    coverage f = toFloat covered -- / toFloat area
       where
         covered = foldl' (\i b -> if b then i+1 else i) 0 (toList f)
-        area = size $ extent f
+--        area = size $ extent f
 
 -- | Calculates fitness for solution stored in chromosome
 fitness :: Task -> Chromosome -> Float
-fitness task@(Task _ twrs _) chr = (coverage + minimal) / 2.0
+fitness task@(Task _ twrs _) chr = coverage-- / if towersCount == 0 then 1 else toFloat towersCount
   where coverage = calcCoverage task chr
-        minimal = toFloat (length $ filterTowers chr twrs) / toFloat (length twrs)
+--        towersUsed = length $ filterTowers chr twrs
+--        towersCount = length twrs
+--        minimal = 1 - (toFloat towersUsed / toFloat towersCount)
 
 -- | Helper to choose between two elements with provided chance of the first one
 randChoice :: Rational -> Rand StdGen a -> Rand StdGen a -> Rand StdGen a
@@ -188,7 +190,7 @@ nextPopulation opts task pop = do
     a3 <- applyMutation a2
     b3 <- applyMutation b2
     return [a3, b3]
-  return $ if length newPop == length pop then newPop else tail newPop
+  return $ if length newPop <= length pop then newPop else tail newPop
   where fits = toRational <$> fitness task <$> pop
         maxfit = maximum fits
         chances = zip pop ((/maxfit) <$> fits)
@@ -235,5 +237,5 @@ main :: IO ()
 main = do
   (input, output, evolopts) <- parseArgs 
   opts <- loadEvolOptions evolopts
-  gen <- getStdGen
+  gen <- newStdGen
   saveResult output =<< solve gen opts <$> loadTask input
