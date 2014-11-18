@@ -3,8 +3,10 @@ module Main where
 import Prelude as P
 import Data.Array.Repa hiding ((++))
 import Data.Functor
+import Data.Function
 import Data.List as List
-import qualified Data.Vector as Vec 
+import qualified Data.Vector as Vec
+import Control.Arrow 
 import Control.Monad.Random as Rand
 import Control.Monad as Monad
 import Text.Parsec
@@ -12,6 +14,7 @@ import Text.Parsec.Token
 import Text.Parsec.Language
 import System.Environment (getArgs)
 import System.IO
+import Debug.Trace
 
 -- | Field is two dimensional array of unboxed booleans
 type Field = Array U DIM2 Bool
@@ -103,13 +106,34 @@ loadEvolOptions path = do
 saveResult :: FilePath -> [Tower] -> IO ()
 saveResult path ts = withFile path WriteMode $ \h -> mapM_ (\(x,y) -> hPutStrLn h $ show x ++ " " ++ show y) ts 
 
--- | Solving the problem using genetic algorithm
-solve :: StdGen -> EvolOptions -> Task -> [Tower]
-solve gen opts (Task field towers radius) = undefined
-
 type Chromosome = Vec.Vector Bool
 type Population = [Chromosome]
 
+-- | Solving the problem using genetic algorithm
+solve :: StdGen -> EvolOptions -> Task -> [Tower]
+solve gen opts task@(Task _ twrs _) = evalRand solve' gen
+  where 
+    solve' = do
+      pops <- Monad.replicateM (popCount opts) $ 
+        initPopulation (indCount opts) (length twrs)
+      lastPop <- foldM nextGen pops $ reverse [1 .. maxGeneration opts]
+      return $ filterTowers (snd $ findBest task lastPop) twrs
+    
+    nextGen :: [Population] -> Int -> Rand StdGen [Population]
+    nextGen pops i = do
+      pops' <- trace ("Generation " ++ show i) $ mapM (nextPopulation opts task) pops
+      return $ trace ("Best fitness: " ++ show (fst $ findBest task pops')) pops' 
+      
+-- | Fetching best solution from populations      
+findBest :: Task -> [Population] -> (Float, Chromosome)
+findBest task pops = maximumBy (compare `on` fst) 
+  $ findPopBest task <$> pops
+
+-- | Fetching best solution from population
+findPopBest :: Task -> Population -> (Float, Chromosome)
+findPopBest task pop = maximumBy (compare `on` fst) 
+  $ first (fitness task) <$> zip pop pop
+    
 -- | Creating chromosome with random values, n is a length of chromosome
 initChromosome :: Int -> Rand StdGen Chromosome
 initChromosome n = Vec.replicateM n randBool
