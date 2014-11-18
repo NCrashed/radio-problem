@@ -41,8 +41,7 @@ findBest task pops = maximumBy (compare `on` fst)
 
 -- | Fetching best solution from population
 findPopBest :: Task -> Population -> (Float, Chromosome)
-findPopBest task pop = traceShow (first (fitness task) <$> zip pop pop) $ maximumBy (compare `on` fst) 
-  $ first (fitness task) <$> zip pop pop
+findPopBest task pop = maximumBy (compare `on` fst) $ first (fitness task) <$> zip pop pop
     
 -- | Creating chromosome with random values, n is a length of chromosome
 initChromosome :: Int -> Rand StdGen Chromosome
@@ -64,11 +63,13 @@ toFloat = fromIntegral . toInteger
 
 -- | Calculates percentage of network coverage by solution in chromosome
 calcCoverage :: Task -> Chromosome -> Float
-calcCoverage (Task fsize twrs radius) chr = coverage $ foldl' placeTower field $ filterTowers chr twrs
+calcCoverage (Task fsize twrs radius) chr = coverage $ dbg $ foldl' placeTower field $ filterTowers chr twrs
   where 
     field = cleanField fsize
+    dbg f = f --trace (show chr ++ "\n" ++ show f) f
     placeTower :: Field -> Tower -> Field 
-    placeTower (Field f) (tx, ty) = Field $ computeUnboxedS $ traverse f id $ \_ sh -> inRadius sh 
+    placeTower (Field f) (tx, ty) = Field $ computeUnboxedS $ traverse f id $ 
+      \getter sh -> getter sh || inRadius sh 
       where
         inRadius :: DIM2 -> Bool
         inRadius (Z :. y :. x) = (tx-x)*(tx-x) + (ty-y)*(ty-y) <= radius*radius
@@ -80,7 +81,7 @@ calcCoverage (Task fsize twrs radius) chr = coverage $ foldl' placeTower field $
 
 -- | Calculates fitness for solution stored in chromosome
 fitness :: Task -> Chromosome -> Float
-fitness task@(Task _ twrs _) chr = coverage-- * minimal
+fitness task@(Task _ twrs _) chr = coverage * minimal
   where coverage = calcCoverage task chr
         towersUsed = length $ filterTowers chr twrs
         towersCount = length twrs
