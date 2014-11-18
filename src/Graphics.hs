@@ -6,6 +6,10 @@ import Graphics.Gloss
 import Task
 import Genetic
 
+applyN :: Int -> (a -> a) -> a -> a
+applyN 0 _ v = v
+applyN n f v = applyN (n-1) f (f v)
+
 drawSolution :: Task -> Chromosome -> IO ()
 drawSolution task chr = display mode white $ solutionPicture task chr
   where mode = InWindow "Radio-problem solver" (1280, 1024) (10, 10)
@@ -17,8 +21,9 @@ solutionPicture task@(Task _ twrs radius) chr = pictures $ cells ++ xlabels ++ y
         cwidth = 200 :: Float
         cheight = cwidth :: Float
         
-        cell True = pictures [color green $ rectangleSolid cwidth cheight, rectangleWire cwidth cheight]
-        cell False = rectangleWire cwidth cheight
+        cell 0 = rectangleWire cwidth cheight
+        cell v = pictures [color (applyN v dark green) 
+          $ rectangleSolid cwidth cheight, rectangleWire cwidth cheight]
         place (Z:.y:.x) = translate (cwidth * fromIntegral x) (- cheight * fromIntegral y)
         cells = toList $ traverse field id $ \getter sh -> place sh $ cell $ getter sh
         
@@ -50,4 +55,3 @@ tower basecol = pictures $ scale 80 60 . color basecol <$> [triangle, dot, rwave
         waves a = pictures $ translate 0 2 <$> rotate a <$> [thickArc 0 120 0.4 0.1, thickArc 0 120 0.6 0.1]
         rwaves = waves 60
         lwaves = waves (-120)
-        -- basecol = color (greyN 0.3)

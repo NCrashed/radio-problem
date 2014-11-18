@@ -68,7 +68,7 @@ solutionField (Task fsize twrs radius) chr = foldl' placeTower field $ filterTow
     field = cleanField fsize
     placeTower :: Field -> Tower -> Field 
     placeTower (Field f) (tx, ty) = Field $ computeUnboxedS $ traverse f id $ 
-      \getter sh -> getter sh || inRadius sh 
+      \getter sh -> getter sh + if inRadius sh then 1 else 0 
       where
         inRadius :: DIM2 -> Bool
         inRadius (Z :. y :. x) = (tx-x)*(tx-x) + (ty-y)*(ty-y) <= radius*radius
@@ -80,7 +80,7 @@ calcCoverage task = coverage . solutionField task
     coverage :: Field -> Float
     coverage (Field f) = toFloat covered / toFloat area
       where
-        covered = foldl' (\i b -> if b then i+1 else i) 0 (toList f)
+        covered = foldl' (\i b -> if b>0 then i+1 else i) 0 (toList f)
         area = size $ extent f
 
 -- | Calculates fitness for solution stored in chromosome
