@@ -12,6 +12,7 @@ executable radio-problem
                    repa >=3.2.5 && <3.3,
                    parsec >=3.1.7 && <3.2,
                    vector >=0.10.11 && <0.11,
-                   MonadRandom >=0.3 && <0.4
+                   MonadRandom >=0.3 && <0.4,
+                   gloss >=1.8.2 && <1.9
   ghc-options:     -Wall
 

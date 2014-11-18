@@ -11,7 +11,6 @@ import Control.Monad.Random as Rand
 import Control.Monad as Monad
 
 import Task
-import Debug.Trace
 
 newtype Chromosome = Chromosome (Vec.Vector Bool)
 type Population = [Chromosome]
@@ -20,19 +19,20 @@ instance Show Chromosome where
   show (Chromosome chr) = concat . Vec.toList $ (\b -> if b then "1" else "0") <$> chr
   
 -- | Solving the problem using genetic algorithm
-solve :: StdGen -> EvolOptions -> Task -> [Tower]
+solve :: StdGen -> EvolOptions -> Task -> Chromosome
 solve gen opts task@(Task _ twrs _) = evalRand solve' gen
   where 
     solve' = do
       pops <- Monad.replicateM (popCount opts) $ 
         initPopulation (indCount opts) (length twrs)
       lastPop <- foldM nextGen pops $ reverse [1 .. maxGeneration opts]
-      return $ filterTowers (snd $ findBest task lastPop) twrs
+      return (snd $ findBest task lastPop)
     
     nextGen :: [Population] -> Int -> Rand StdGen [Population]
-    nextGen pops i = do
-      pops' <- trace ("Generation " ++ show i) $ mapM (nextPopulation opts task) pops
-      return $ trace ("Best fitness: " ++ show (fst $ findBest task pops')) pops' 
+    nextGen pops _ = mapM (nextPopulation opts task) pops 
+      -- TODO: Put this in writer monad
+      -- trace ("Generation " ++ show i)
+      -- trace ("Best fitness: " ++ show (fst $ findBest task pops'))
       
 -- | Fetching best solution from populations      
 findBest :: Task -> [Population] -> (Float, Chromosome)
@@ -61,18 +61,22 @@ filterTowers (Chromosome chr) = P.map snd . filter ((== True) . fst) . zip (Vec.
 toFloat :: Int -> Float
 toFloat = fromIntegral . toInteger
 
--- | Calculates percentage of network coverage by solution in chromosome
-calcCoverage :: Task -> Chromosome -> Float
-calcCoverage (Task fsize twrs radius) chr = coverage $ dbg $ foldl' placeTower field $ filterTowers chr twrs
+-- | Constructs network field from solution in chromosome
+solutionField :: Task -> Chromosome -> Field
+solutionField (Task fsize twrs radius) chr = foldl' placeTower field $ filterTowers chr twrs
   where 
     field = cleanField fsize
-    dbg f = f --trace (show chr ++ "\n" ++ show f) f
     placeTower :: Field -> Tower -> Field 
     placeTower (Field f) (tx, ty) = Field $ computeUnboxedS $ traverse f id $ 
       \getter sh -> getter sh || inRadius sh 
       where
         inRadius :: DIM2 -> Bool
         inRadius (Z :. y :. x) = (tx-x)*(tx-x) + (ty-y)*(ty-y) <= radius*radius
+
+-- | Calculates percentage of network coverage by solution in chromosome
+calcCoverage :: Task -> Chromosome -> Float
+calcCoverage task = coverage . solutionField task
+  where 
     coverage :: Field -> Float
     coverage (Field f) = toFloat covered / toFloat area
       where

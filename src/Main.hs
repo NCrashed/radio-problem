@@ -1,10 +1,11 @@
 module Main where
 
 import Prelude as P
-import Data.Functor
 import Control.Monad.Random as Rand
 import System.Environment (getArgs)
 
+import Graphics
+import Task
 import Parsing
 import Genetic
            
@@ -21,4 +22,7 @@ main = do
   (input, output, evolopts) <- parseArgs 
   opts <- loadEvolOptions evolopts
   gen <- newStdGen
-  saveResult output =<< solve gen opts <$> loadTask input
+  task@(Task _ twrs _) <- loadTask input
+  let solution = solve gen opts task
+  saveResult output (filterTowers solution twrs)
+  drawSolution task solution
