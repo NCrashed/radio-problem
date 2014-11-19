@@ -4,7 +4,7 @@ import Prelude as P
 import Control.Monad.Random as Rand
 import System.Environment (getArgs)
 
-import Graphics
+import Graphics.Solution
 import Task
 import Parsing
 import Genetic

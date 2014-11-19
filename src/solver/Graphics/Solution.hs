@@ -1,4 +1,4 @@
-module Graphics where
+module Graphics.Solution where
 
 import Data.Array.Repa hiding ((++))
 import Data.Functor
