@@ -20,3 +20,5 @@ of genetic algorithms.
 
 Example of large input data:
 ![Complex solution](screenshot2.png)
+
+![Complex solution](screenshot3.png)
