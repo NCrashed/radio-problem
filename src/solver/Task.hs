@@ -1,5 +1,6 @@
 module Task where
 
+import Control.Concurrent.STM.TChan
 import Data.Array.Repa as Repa
 import Data.Functor
 
@@ -36,3 +37,6 @@ data EvolOptions = EvolOptions {
   , popCount :: Int
   , indCount :: Int
   }
+
+-- | Channel to pass plot points
+type StatChannel = TChan (Int, Float)

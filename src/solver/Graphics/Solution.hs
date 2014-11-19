@@ -9,10 +9,6 @@ import Genetic
 applyN :: Int -> (a -> a) -> a -> a
 applyN 0 _ v = v
 applyN n f v = applyN (n-1) f (f v)
-
-drawSolution :: Task -> Chromosome -> IO ()
-drawSolution task chr = display mode white $ solutionPicture task chr
-  where mode = InWindow "Radio-problem solver" (1280, 1024) (10, 10)
   
 solutionPicture :: Task -> Chromosome -> Picture
 solutionPicture task@(Task _ twrs radius) chr = pictures $ cells ++ xlabels ++ ylabels ++ towers ++ circles ++ info
