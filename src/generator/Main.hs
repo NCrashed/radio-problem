@@ -1,4 +1,4 @@
-module Generator where
+module Main where
 
 import Options.Applicative
 
@@ -52,5 +52,5 @@ main = execParser opts >>= generator
   where
     opts = info (helper <*> options) (
          fullDesc
-      <> progDesc "Generates data set with COUNT towers and field of WIDTH x HEIGHT size"
+      <> progDesc "Generates data set with COUNT towers and field of WIDTH x HEIGHT size, stores output to FILENAME file location"
       <> header "radio-problem-generator - generator of data sets for 'radio-problem'" )
