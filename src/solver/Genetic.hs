@@ -104,7 +104,7 @@ randChoice chance th els = join (Rand.fromList [(th, chance), (els, 1 - chance)]
 -- | Caclulates next generation of population
 nextPopulation :: EvolOptions -> Task -> Population -> GenRand Population
 nextPopulation opts task pop = do 
-  newPop <- liftM concat $ Monad.replicateM (length pop `div` 2) $ do
+  newPop' <- liftM concat $ Monad.replicateM (nonEliteCount `div` 2) $ do
     liftIO yield
     a1 <- takeChr
     b1 <- takeChr
@@ -112,6 +112,7 @@ nextPopulation opts task pop = do
     a3 <- applyMutation a2
     b3 <- applyMutation b2
     return [a3, b3]
+  let newPop = elite ++ newPop'
   return $ if length newPop <= length pop then newPop else tail newPop
   where fits = toRational <$> fitness task <$> pop
         maxfit = maximum fits
@@ -119,7 +120,10 @@ nextPopulation opts task pop = do
         takeChr = Rand.fromList chances
         mutChance = toRational $ mutationChance opts
         applyMutation c = randChoice mutChance (mutation c) (return c)
-
+        bests = snd <$> sortBy (flip compare `on` fst) (first (fitness task) <$> zip pop pop)
+        elite = take (ceiling $ fromIntegral (length bests) * elitePart opts) bests
+        nonEliteCount = length pop - length elite
+        
 -- | Crossover operator, fallbacks to trival cases if length isn't enough for
 -- thre pointed crossover
 crossover :: Chromosome -> Chromosome -> GenRand (Chromosome, Chromosome)
