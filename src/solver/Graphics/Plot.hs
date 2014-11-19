@@ -1,17 +1,11 @@
 module Graphics.Plot where
 
 import Graphics.Gloss
-import Graphics.Gloss.Interface.IO.Animate
 import Data.Monoid
 import Data.List
 import Data.Function
 import Data.Functor
-import Data.IORef
 import Text.Printf
-import Control.Concurrent.Chan
-import Control.Concurrent
-import Control.Monad
-import Control.Arrow (first)
 
 takeUniform :: Int -> [a] -> [a]
 takeUniform n l
@@ -24,7 +18,7 @@ takeUniform n l
               [] -> []
               
 plot :: String -> String -> [Point] -> Picture
-plot xstr ystr pts = coords <> plotted <> xlabel <> ylabel <> grid
+plot xstr ystr pts = coords <> xlabel <> ylabel <> grid <> plotted
   where coords = xcoord <> ycoord
         xcoord = line [(0, 0), (1,0)] <> translate 1 0 xarrow
         ycoord = line [(0, 0), (0,1)] <> translate 0 1 yarrow
@@ -69,14 +63,3 @@ plot xstr ystr pts = coords <> plotted <> xlabel <> ylabel <> grid
 
 sample :: Float -> Float -> Int -> (Float -> Float) -> [(Float, Float)]
 sample xmin xmax i f = (\x -> (x, f x)) <$> ((\j -> xmin + (xmax - xmin) * fromIntegral j / fromIntegral i) <$> [0 .. i - 1]) 
-         
---drawPlot :: Chan (Maybe (Int, Float)) -> IO ()
---drawPlot chan = do
---  dataRef <- newIORef []
---  _ <- forkIO $ forever $ do
---    item <- readChan chan 
---    modifyIORef dataRef (++ [item])
---  animateIO mode white $ const $ do
---    samples <- readIORef dataRef
---    return $ scale 100 100 $ plot "generation" "fitness" $ first fromIntegral <$> samples
---  where mode = InWindow "Radio-problem solver" (1280, 1024) (10, 10)

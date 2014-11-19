@@ -16,7 +16,7 @@ executable radio-problem
                    transformers >=0.4.1 && <0.5,
                    async >=2.0.1 && <2.1,
                    stm >=2.4.3 && <2.5
-  ghc-options:     -Wall -threaded
+  ghc-options:     -Wall -Odph -rtsopts -threaded -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000 -fllvm -optlo-O3
   hs-source-dirs:  src/solver
 
 executable radio-problem-generator

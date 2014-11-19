@@ -2,6 +2,7 @@ module Graphics.Solution where
 
 import Data.Array.Repa hiding ((++))
 import Data.Functor
+import Data.Monoid
 import Graphics.Gloss
 import Task
 import Genetic
@@ -10,8 +11,8 @@ applyN :: Int -> (a -> a) -> a -> a
 applyN 0 _ v = v
 applyN n f v = applyN (n-1) f (f v)
   
-solutionPicture :: Task -> Chromosome -> Picture
-solutionPicture task@(Task _ twrs radius) chr = pictures $ cells ++ xlabels ++ ylabels ++ towers ++ circles ++ info
+solutionPicture :: Task -> Chromosome -> Picture -> Picture
+solutionPicture task@(Task _ twrs radius) chr plot = mconcat $ cells ++ xlabels ++ ylabels ++ towers ++ circles ++ info ++ plot'
   where Field field = solutionField task chr
         (Z:.fw:._) = extent field
         cwidth = 200 :: Float
@@ -36,14 +37,17 @@ solutionPicture task@(Task _ twrs radius) chr = pictures $ cells ++ xlabels ++ y
         circles = placeCircle <$> placedTowers
         placeCircle (x,y) = translate (cwidth * fromIntegral x) (-cheight * fromIntegral y) 
           $ circle (fromIntegral radius * cwidth)
-          
-        info = translate (cwidth*(fromIntegral fw + 1)) 0 <$> rows 150 ([
+        
+        fieldDrawWidth = cwidth* fromIntegral fw
+        info = translate (fieldDrawWidth + cwidth) 0 <$> rows 150 ([
             text $ "Solution: " ++ show chr
           , text $ "Fitness: " ++ show (fitness task chr)  
           , text "Towers: "
           ] ++ (text . show <$> placedTowers))
         rows h txts = (\(dy, p) -> translate 0 (-dy) p) <$> zip ((h*) <$> [1 .. ]) txts
-               
+
+        plot' = [translate (fieldDrawWidth + 20*cwidth) (-17*cheight) $ scale 6 6 plot]
+                      
 tower :: Color -> Picture
 tower basecol = pictures $ scale 80 60 . color basecol <$> [triangle, dot, rwaves, lwaves]
   where triangle = polygon [(-0.5, 0), (0.5, 0), (0, 1.8)]
