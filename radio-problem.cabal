@@ -16,3 +16,11 @@ executable radio-problem
                    gloss >=1.8.2 && <1.9
   ghc-options:     -Wall
 
+executable radio-problem-generator
+  build-depends:   
+                   base >= 4,
+                   optparse-applicative >=0.11.0 && <0.12
+  hs-source-dirs:  src
+  ghc-options:     -Wall -rtsopts
+  main-is:         Generator.hs
+
