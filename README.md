@@ -17,3 +17,6 @@ There is also fancy vizualization using [Gloss](http://gloss.ouroborus.net/):
 
 This program is used in [BMSTU](http://www.bmstu.ru/en/) as practical task for investigating concepts
 of genetic algorithms.
+
+Example of large input data:
+![Complex solution](screenshot2.png)

@@ -1,6 +1,9 @@
 module Main where
 
 import Options.Applicative
+import Control.Monad.Random
+import Control.Monad
+import System.IO
 
 data Options = Options {
     radiusMin :: Int
@@ -38,15 +41,12 @@ options = Options
     <> short 'n'
     <> metavar "COUNT"
     <> help "how many towers positions to generate")
-  <*> option auto (
+  <*> strOption (
        long "output"
     <> short 'o'
     <> metavar "FILENAME"
     <> help "where to save generated data set")
-  
-generator :: Options -> IO ()
-generator = undefined
-
+    
 main :: IO ()
 main = execParser opts >>= generator
   where
@@ -54,3 +54,26 @@ main = execParser opts >>= generator
          fullDesc
       <> progDesc "Generates data set with COUNT towers and field of WIDTH x HEIGHT size, stores output to FILENAME file location"
       <> header "radio-problem-generator - generator of data sets for 'radio-problem'" )
+
+generator :: Options -> IO ()
+generator o = saveTask (outputFile o) =<< evalRandIO (generate o)
+
+type FieldSize = (Int, Int)
+type Tower = (Int, Int)
+type Radius = Int
+data Task = Task FieldSize [Tower] Radius
+
+generate :: Options -> Rand StdGen Task
+generate o = do 
+  radius <- getRandomR (radiusMin o, radiusMax o)
+  towers <- replicateM (towersCount o) $ do
+    x <- getRandomR (0, fieldWidth o - 1)
+    y <- getRandomR (0, fieldHeight o - 1)
+    return (x, y)
+  return $ Task (fieldWidth o, fieldHeight o) towers radius
+
+saveTask :: FilePath -> Task -> IO ()
+saveTask path (Task (fw, fh) twrs radius) = withFile path WriteMode $ \h -> do
+  hPrint h radius
+  hPutStrLn h $ show fw ++ " " ++ show fh
+  mapM_ (\(x,y) -> hPutStrLn h $ show x ++ " " ++ show y) twrs 
