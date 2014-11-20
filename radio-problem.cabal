@@ -1,8 +1,21 @@
 name:           radio-problem
-version:        0.1
-cabal-version:  >=1.2
+version:        1.0.0
+cabal-version:  >= 1.2
 build-type:     Simple
 author:         ncrashed
+copyright:      Copyright © 2014 Gushcha Anton
+license:        MIT
+license-file:   LICENSE
+stability:      Experimental
+maintainer:     ncrashed@gmail.com
+homepage:       https://github.com/ncrashed/radio-problem
+synopsis:       Genetic algorithm for solving radio problem
+description:    
+                Demonstration of genetic algorithm approach for solving complex optimization problems. The application solves problem: "There are n 
+                possible places for radio towers. What is minimal count of radio towers to be placed to achieve maximum coverage of network?".
+                Application uses three pointed crossover operator, bit-string representation of solution, classic mutation and elite solution saving. Also 
+                the search process and result solution are visualized via Gloss package.
+category:       Math
 
 executable radio-problem
   main-is:         Main.hs
