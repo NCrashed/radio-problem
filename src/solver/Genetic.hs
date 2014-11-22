@@ -2,7 +2,6 @@ module Genetic where
 
 import Prelude as P
 import qualified Data.Vector as Vec
-import Data.Array.Repa hiding ((++))
 import Data.Function
 import Data.Functor
 import Data.List as List
@@ -16,12 +15,7 @@ import Control.Monad.IO.Class (liftIO)
 
 import Task
 
-newtype Chromosome = Chromosome (Vec.Vector Bool)
-type Population = [Chromosome]
 type GenRand = RandT StdGen IO 
-
-instance Show Chromosome where
-  show (Chromosome chr) = concat . Vec.toList $ (\b -> if b then "1" else "0") <$> chr
   
 -- | Solving the problem using genetic algorithm
 solve :: StatChannel -> StdGen -> EvolOptions -> Task -> IO Chromosome
@@ -58,44 +52,6 @@ initChromosome n = Chromosome <$> Vec.replicateM n randBool
 -- | Creating population with m chromosomes with length n
 initPopulation :: Int -> Int -> GenRand Population
 initPopulation m n = replicateM m $ initChromosome n
-
--- | Returns only placed towers by solution in chromosome
-filterTowers :: Chromosome -> [Tower] -> [Tower]
-filterTowers (Chromosome chr) = P.map snd . filter ((== True) . fst) . zip (Vec.toList chr)
-
--- | Conversion helper
-toFloat :: Int -> Float
-toFloat = fromIntegral . toInteger
-
--- | Constructs network field from solution in chromosome
-solutionField :: Task -> Chromosome -> Field
-solutionField (Task fsize twrs radius) chr = foldl' placeTower field $ filterTowers chr twrs
-  where 
-    field = cleanField fsize
-    placeTower :: Field -> Tower -> Field 
-    placeTower (Field f) (tx, ty) = Field $ computeUnboxedS $ traverse f id $ 
-      \getter sh -> getter sh + if inRadius sh then 1 else 0 
-      where
-        inRadius :: DIM2 -> Bool
-        inRadius (Z :. y :. x) = (tx-x)*(tx-x) + (ty-y)*(ty-y) <= radius*radius
-
--- | Calculates percentage of network coverage by solution in chromosome
-calcCoverage :: Task -> Chromosome -> Float
-calcCoverage task = coverage . solutionField task
-  where 
-    coverage :: Field -> Float
-    coverage (Field f) = toFloat covered / toFloat area
-      where
-        covered = foldl' (\i b -> if b>0 then i+1 else i) 0 (toList f)
-        area = size $ extent f
-
--- | Calculates fitness for solution stored in chromosome
-fitness :: Task -> Chromosome -> Float
-fitness task@(Task _ twrs _) chr = coverage * minimal
-  where coverage = calcCoverage task chr
-        towersUsed = length $ filterTowers chr twrs
-        towersCount = length twrs
-        minimal = 1 - (toFloat towersUsed / toFloat towersCount)
 
 -- | Helper to choose between two elements with provided chance of the first one
 randChoice :: Rational -> GenRand a -> GenRand a -> GenRand a
