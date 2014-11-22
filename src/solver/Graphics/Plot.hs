@@ -6,7 +6,7 @@ import Data.List
 import Data.Function
 import Data.Functor
 import Text.Printf
-
+import Debug.Trace
 takeUniform :: Int -> [a] -> [a]
 takeUniform n l
   | n > length l = error "n is larger than passed list!"
@@ -32,17 +32,19 @@ plot xstr ystr pts = coords <> xlabel <> ylabel <> grid <> plotted
         
         ymargin = 0.1
         xmargin = 0.1
-        toLocal (x, y) = ( xmargin + (1 - 2*xmargin) * (x - xmin) / (xmax - xmin)
-                         , ymargin + (1 - 2*ymargin) * (y - ymin) / (ymax - ymin))
-        fromLocalX x = xmin + (x - xmargin) * (xmax - xmin) / (1 - 2*xmargin)
-        fromLocalY y = ymin + (y - ymargin) * (ymax - ymin) / (1 - 2*ymargin)
+        xrange = let v = xmax - xmin in if v == 0 then 1.0 else v
+        yrange = let v = ymax - ymin in if v == 0 then 1.0 else v
+        toLocal (x, y) = ( xmargin + (1 - 2*xmargin) * (x - xmin) / xrange
+                         , ymargin + (1 - 2*ymargin) * (y - ymin) / yrange)
+        fromLocalX x = xmin + (x - xmargin) * xrange / (1 - 2*xmargin)
+        fromLocalY y = ymin + (y - ymargin) * yrange / (1 - 2*ymargin)
                            
         localPts = toLocal <$> pts
         intervals 
           | null localPts = [] 
           | length localPts == 1 = [(head localPts, head localPts)] 
           | otherwise = localPts `zip` tail localPts
-        plotted = color red $ mconcat $ (\(s, e) -> line [s, e]) <$> intervals
+        plotted = color red $ mconcat $ (\(s, e) -> line [s, e]) <$> (traceShow localPts $ intervals)
         
         ltexscale = 0.0006
         xlabel = translate 0.8 (-0.1) $ scale ltexscale ltexscale $ text xstr

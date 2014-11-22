@@ -30,7 +30,7 @@ type Tower = (Int, Int)
 type Radius = Int
 
 -- | Input data
-data Task = Task FieldSize [Tower] Radius
+data Task = Task FieldSize [Tower] Radius FitnessFunc
 
 -- | Options of evolution process
 data EvolOptions = EvolOptions {
@@ -60,7 +60,7 @@ toFloat = fromIntegral . toInteger
 
 -- | Constructs network field from solution in chromosome
 solutionField :: Task -> Chromosome -> Field
-solutionField (Task fsize twrs radius) chr = foldl' placeTower field $ filterTowers chr twrs
+solutionField (Task fsize twrs radius _) chr = foldl' placeTower field $ filterTowers chr twrs
   where 
     field = cleanField fsize
     placeTower :: Field -> Tower -> Field 
@@ -80,10 +80,15 @@ calcCoverage task = coverage . solutionField task
         covered = foldl' (\i b -> if b>0 then i+1 else i) 0 (toList f)
         area = size $ extent f
 
+-- | Type of function that calculates actual fitness
+type FitnessFunc = Float -- ^ Coverage percent of field
+  -> Int -- ^ Number of used towers
+  -> Int -- ^ Number of towers
+  -> Float
+
 -- | Calculates fitness for solution stored in chromosome
 fitness :: Task -> Chromosome -> Float
-fitness task@(Task _ twrs _) chr = coverage * minimal
+fitness task@(Task _ twrs _ fit) chr = fit coverage towersUsed towersCount
   where coverage = calcCoverage task chr
         towersUsed = length $ filterTowers chr twrs
         towersCount = length twrs
-        minimal = 1 - (toFloat towersUsed / toFloat towersCount)

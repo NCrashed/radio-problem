@@ -19,7 +19,7 @@ type GenRand = RandT StdGen IO
   
 -- | Solving the problem using genetic algorithm
 solve :: StatChannel -> StdGen -> EvolOptions -> Task -> IO Chromosome
-solve ch gen opts task@(Task _ twrs _) = evalRandT solve' gen
+solve ch gen opts task@(Task _ twrs _ _) = evalRandT solve' gen
   where 
     solve' = do
       pops <- Monad.replicateM (popCount opts) $ do

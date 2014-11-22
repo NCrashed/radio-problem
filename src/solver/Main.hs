@@ -31,7 +31,7 @@ main = do
   
   opts <- loadEvolOptions evolopts
   gen <- newStdGen
-  task@(Task _ twrs _) <- loadTask input
+  task@(Task _ twrs _ _) <- loadTask input "scripts/DefaultFitness.hs"
   
   chan <- newTChanIO
   asolution <- async $ solve chan gen opts task
@@ -62,4 +62,4 @@ main = do
                 samples <- readIORef dataRef
                 return $ solutionPicture task solution (fitnessPlot samples)
       where mode = InWindow "Radio-problem solver" (1280, 1024) (10, 10)
-            fitnessPlot ds =  translate (-400) (-400) $ scale 800 800 $ plot "generation" "fitness" $ first fromIntegral <$> ds
+            fitnessPlot ds =  translate (-300) (-300) $ scale 600 600 $ plot "generation" "fitness" $ first fromIntegral <$> ds

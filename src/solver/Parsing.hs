@@ -11,14 +11,16 @@ import Control.Monad
 import System.IO
 
 import Task
+import Plugin
 
--- | Loading Task from file
-loadTask :: FilePath -> IO Task
-loadTask path = do
+-- | Loading Task from file and script file
+loadTask :: FilePath -> FilePath -> IO Task
+loadTask path script = do
   str <- readFile path
+  fitnessFunc <- loadFitnessFunc script
   case parse parser "" str of
     Left err -> fail $ show err
-    Right task -> return task
+    Right task -> return $ task fitnessFunc
   where
     parser = do
       spaces

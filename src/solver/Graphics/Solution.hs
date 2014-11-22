@@ -5,14 +5,13 @@ import Data.Functor
 import Data.Monoid
 import Graphics.Gloss
 import Task
-import Genetic
 
 applyN :: Int -> (a -> a) -> a -> a
 applyN 0 _ v = v
 applyN n f v = applyN (n-1) f (f v)
   
 solutionPicture :: Task -> Chromosome -> Picture -> Picture
-solutionPicture task@(Task _ twrs radius) chr plot = mconcat $ cells ++ xlabels ++ ylabels ++ towers ++ circles ++ info ++ plot'
+solutionPicture task@(Task _ twrs radius _) chr plot = mconcat $ cells ++ xlabels ++ ylabels ++ towers ++ circles ++ info ++ plot'
   where Field field = solutionField task chr
         (Z:.fw:._) = extent field
         cwidth = 200 :: Float
