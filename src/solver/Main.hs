@@ -2,7 +2,6 @@ module Main where
 
 import Prelude as P
 import Control.Monad.Random as Rand
-import System.Environment (getArgs)
 import Data.Functor
 import Data.IORef
 import Graphics.Gloss.Interface.IO.Animate

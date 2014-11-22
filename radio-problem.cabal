@@ -1,5 +1,5 @@
 name:           radio-problem
-version:        1.0.0
+version:        1.1.0
 cabal-version:  >= 1.2
 build-type:     Simple
 author:         ncrashed
@@ -26,7 +26,7 @@ executable radio-problem
                    vector >=0.10.11 && <0.11,
                    MonadRandom >=0.3 && <0.4,
                    gloss >=1.8.2 && <1.9,
-                   transformers >=0.4.1 && <0.5,
+                   transformers >=0.3.0 && <0.5,
                    async >=2.0.1 && <2.1,
                    stm >=2.4.3 && <2.5,
                    hint >=0.4.2 && <0.5
@@ -37,7 +37,7 @@ executable radio-problem-generator
   build-depends:   
                    base >= 4,
                    optparse-applicative >=0.11.0 && <0.12,
-                   transformers >=0.4.1 && <0.5,
+                   transformers >=0.3.0 && <0.5,
                    stm >=2.4.3 && <2.5
   ghc-options:     -Wall -rtsopts
   main-is:         Main.hs
