@@ -38,8 +38,7 @@ executable radio-problem-generator
                    base >= 4,
                    optparse-applicative >=0.11.0 && <0.12,
                    transformers >=0.4.1 && <0.5,
-                   stm >=2.4.3 && <2.5,
-                   hint >=0.4.2 && <0.5
+                   stm >=2.4.3 && <2.5
   ghc-options:     -Wall -rtsopts
   main-is:         Main.hs
   hs-source-dirs:  src/generator

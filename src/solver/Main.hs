@@ -8,6 +8,8 @@ import Data.IORef
 import Graphics.Gloss.Interface.IO.Animate
 import Graphics.Solution
 import Graphics.Plot
+
+import Args
 import Task
 import Parsing
 import Genetic
@@ -17,21 +19,14 @@ import Control.Concurrent.STM.TChan
 import Control.Monad.STM
 import Control.Arrow (first)
 
--- | Reading input and output filenames from program arguments
-parseArgs :: IO (String, String, String)
-parseArgs = do
-  ls <- getArgs
-  if length ls < 3 
-    then fail "Expecing three arguments: name of input file, name of output file and name of file with evolution options"
-    else return (head ls, ls !! 1, ls !! 2)
-    
+
 main :: IO ()
 main = do
-  (input, output, evolopts) <- parseArgs 
+  args <- parseOptions 
   
-  opts <- loadEvolOptions evolopts
+  opts <- loadEvolOptions (evolOptionsFileName args)
   gen <- newStdGen
-  task@(Task _ twrs _ _) <- loadTask input "scripts/DefaultFitness.hs"
+  task@(Task _ twrs _ _) <- loadTask (inputFileName args) (fitnessFuncFileName args)
   
   chan <- newTChanIO
   asolution <- async $ solve chan gen opts task
@@ -57,7 +52,7 @@ main = do
             Just esol -> case esol of
               Left e -> fail $ show e
               Right solution -> do
-                saveResult output (filterTowers solution twrs)
+                saveResult (outputFileName args) (filterTowers solution twrs)
                 writeIORef finalSolutionRef (Just solution)
                 samples <- readIORef dataRef
                 return $ solutionPicture task solution (fitnessPlot samples)
