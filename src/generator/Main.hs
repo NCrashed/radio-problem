@@ -73,7 +73,17 @@ generate o = do
   return $ Task (fieldWidth o, fieldHeight o) towers radius
 
 saveTask :: FilePath -> Task -> IO ()
-saveTask path (Task (fw, fh) twrs radius) = withFile path WriteMode $ \h -> do
-  hPrint h radius
-  hPutStrLn h $ show fw ++ " " ++ show fh
-  mapM_ (\(x,y) -> hPutStrLn h $ show x ++ " " ++ show y) twrs 
+saveTask path (Task fieldSize twrs radius) = withFile path WriteMode $ \h -> do
+  hPutStrLn h "module Input where\n"
+  hPutStrLn h "radius :: Int"
+  hPutStrLn h $ "radius = " ++ show radius ++ "\n"
+  hPutStrLn h "fieldSize :: (Int, Int)"
+  hPutStrLn h $ "fieldSize = " ++ show fieldSize ++ "\n"
+  hPutStrLn h "towers :: [(Int, Int)]"
+  hPutStrLn h "towers = ["
+  printTowers h twrs 
+  hPutStrLn h "  ]"
+  where
+    printTowers _ [] = return ()
+    printTowers h [x] = hPutStrLn h $ "  " ++ show x
+    printTowers h (x:ls) = hPutStrLn h ("  " ++ show x ++ ",") >> printTowers h ls  

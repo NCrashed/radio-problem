@@ -16,7 +16,7 @@ options = Options
     <> short 'i'
     <> metavar "INPUT_FILE_NAME"
     <> help "file with input data for model" 
-    <> value "input.txt")
+    <> value "scripts/Input.hs")
   <*> strOption (
        long "output"
     <> short 'o'
@@ -28,7 +28,7 @@ options = Options
     <> short 'e'
     <> metavar "EVOL_OPTIONS_FILE_NAME"
     <> help "file with evolution options for model"
-    <> value "options.txt")
+    <> value "scripts/Options.hs")
   <*> strOption (
        long "fitnessModule"
     <> short 'f'

@@ -16,13 +16,18 @@ description:
                 Application uses three pointed crossover operator, bit-string representation of solution, classic mutation and elite solution saving. Also 
                 the search process and result solution are visualized via Gloss package.
 category:       Math
+data-files:     
+                scripts/DefaultFitness.hs, 
+                scripts/Input.hs, 
+                scripts/InvalidFitness1.hs, 
+                scripts/InvalidFitness2.hs, 
+                scripts/Options.hs
 
 executable radio-problem
   main-is:         Main.hs
   build-depends:   
                    base >= 4,
                    repa >=3.2.5 && <3.3,
-                   parsec >=3.1.7 && <3.2,
                    vector >=0.10.11 && <0.11,
                    MonadRandom >=0.3 && <0.4,
                    gloss >=1.8.2 && <1.9,
