@@ -56,4 +56,4 @@ main = do
                 samples <- readIORef dataRef
                 return $ solutionPicture task solution (fitnessPlot samples)
       where mode = InWindow "Radio-problem solver" (1280, 1024) (10, 10)
-            fitnessPlot ds =  translate (-300) (-300) $ scale 600 600 $ plot "generation" "fitness" $ first fromIntegral <$> ds
+            fitnessPlot ds =  translate (-300) (-200) $ scale 600 600 $ plot "generation" "fitness" $ first fromIntegral <$> ds
